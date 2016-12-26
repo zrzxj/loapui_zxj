@@ -7,8 +7,8 @@ Created on Dec 25, 2016
 from os.path import join
 
 import pandas as pd
-from featureEngineer.base import feature_path, train_path, test_path
-
+#from featureEngineer.base import feature_path, train_path, test_path
+from base import feature_path, train_path, test_path
 def feature_selection(feature, select_feature):
     selected = []
     for _feat in feature.columns:

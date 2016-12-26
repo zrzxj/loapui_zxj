@@ -4,12 +4,13 @@ Created on Dec 25, 2016
 
 @author: loapui
 '''
-
 from os.path import join
 
 import pandas as pd
 
-from featureEngineer.base import train_path, test_path, feature_path
+#from featureEngineer.base import train_path, test_path, feature_path
+#from featureEngineer.features import get_card_feature, get_score_feature
+from base import train_path, test_path, feature_path
 from features import get_card_feature, get_score_feature
 
 def _rank(feature):
@@ -101,7 +102,7 @@ def extract_card_feature(flag):
     card_records['diff'] = card_records['remainder'] - card_records['amount']
     
     # pos type feats
-    print '  -> pos type feats'
+    print('  -> pos type feats')
     card = pd.DataFrame(card_records.groupby(['id', 'consume', 'how'])['amount'].max())
     card.columns = ['amount_max']
     card['amount_min'] = card_records.groupby(['id', 'consume', 'how'])['amount'].min()
@@ -129,49 +130,49 @@ def extract_card_feature(flag):
     card = card.reset_index()
     
     # pos all feats
-    print '  -> pos all feats'
+    print('  -> pos all feats')
     pos_all = card[['id', 'amount_max', 'amount_min', 'amount_avg', 'amount_sum', 'amount_num']][card.consume=='POS消费']
     pos_all.columns = ['id', 'max_all_pos', 'min_all_pos', 'num_all_pos', 'sum_all_pos', 'avg_all_pos']
     card_feature = pd.merge(card_feature, pos_all, how='left', on='id')
     del pos_all
     
     # transfer feats
-    print '  -> transfer feats'
+    print('  -> transfer feats')
     transfer = card[['id', 'amount_max', 'amount_min', 'amount_avg', 'amount_sum', 'amount_num']][card.consume=='圈存转账']
     transfer.columns = ['id', 'max_transfer', 'min_transfer', 'avg_transfer', 'sum_transfer', 'num_transfer']
     card_feature = pd.merge(card_feature, transfer, how='left', on='id')
     del transfer
     
     # payget feats
-    print '  -> payget feats'
+    print('  -> payget feats')
     payget = card[['id', 'amount_max', 'amount_min', 'amount_avg', 'amount_sum', 'amount_num']][card.consume=='支付领取']
     payget.columns = ['id', 'max_payget', 'min_payget', 'avg_payget', 'sum_payget', 'num_payget']
     card_feature = pd.merge(card_feature, payget, how='left', on='id')
     del payget
     
     # card open
-    print '  -> card open feats'
+    print('  -> card open feats')
     card_open = card[['id', 'amount_num']][card.consume=='卡片开户']
     card_open.columns = ['id', 'num_of_open_card']
     card_feature = pd.merge(card_feature, card_open, how='left', on='id')
     del card_open
     
     # card close
-    print '  -> card close feats'
+    print('  -> card close feats')
     card_close = card[['id', 'amount_num']][card.consume=='卡片销户']
     card_close.columns = ['id', 'num_of_close_card']
     card_feature = pd.merge(card_feature, card_close, how='left', on='id')
     del card_close
     
     # card lost
-    print '  -> card lost feats'
+    print('  -> card lost feats')
     card_lost = card[['id', 'amount_num']][card.consume=='卡挂失']
     card_lost.columns = ['id', 'num_of_lost_card']
     card_feature = pd.merge(card_feature, card_lost, how='left', on='id')
     del card_lost
     
     # recharge
-    print '  -> recharge feats'
+    print('  -> recharge feats')
     recharge_amount = card[['id', 'amount_max', 'amount_min', 'amount_avg', 'amount_sum', 'amount_num']][card.consume=='卡充值']
     recharge_amount.columns = ['id', "max_account_recharge", "min_account_recharge", "avg_account_recharge", "sum_account_recharge", "num_account_recharge"]
     card_feature = pd.merge(card_feature, recharge_amount, how='left', on='id')
@@ -188,7 +189,7 @@ def extract_card_feature(flag):
     del recharge_diff
     
     # balance
-    print '  -> balance feats'
+    print('  -> balance feats')
     card = pd.DataFrame(card_records.groupby(['id'])['remainder'].max())
     card['remainder_min'] = card_records.groupby(['id'])['remainder'].min()
     card['remainder_avg'] = card_records.groupby(['id'])['remainder'].mean()
@@ -197,8 +198,14 @@ def extract_card_feature(flag):
     card_feature = pd.merge(card_feature, card, how='left', on='id')
     del card
     
-    print '  -> save'
+    print('  -> save')
     card_feature.to_csv(join(feature_path, 'card_features_'+ flag +'.csv'), index=False)
 
 if __name__ == '__main__':
+    extract_card_feature('train')
+    extract_card_feature('test')
+    extract_score_feature()
+    extract_id_feature()
     transform_ranking_feature()
+    
+    
